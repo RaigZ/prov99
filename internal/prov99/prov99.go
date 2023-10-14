@@ -2,36 +2,47 @@ package prov99
 
 import (
 	"math/rand"
-	"strconv"
 	"time"
 
 	tl "github.com/JoelOtter/termloop"
 )
 
-// Want the game to represent a top level termloop app
+var textInput TextInput
+var game Game
+
 type Game struct {
 	Engine *tl.Game
 	level  *tl.BaseLevel
-	prompt *tl.Text
+	title  *tl.Text
 	rv     int // Random value generated from 1-99
 	pv     int // Current Player value
-	att    int // Each game, we are given 3 attempts, decrement by 1 each attempt has been made
-
-	// Attempts can only be made if a player inputs a value
-	//matrix *Matrix
-	// Win and loss states require to create a new game when true
-
-	//wonStreak  int // count total winnings
-	//lossStreak int // count total losses
+	att    int
+	state  bool
 }
 
 func NewGame() *Game {
-	var game Game
 	game.Engine = tl.NewGame()
 	game.Engine.Screen().SetFps(30)
 	game.level = tl.NewBaseLevel(tl.Cell{
 		Bg: tl.ColorBlack,
 	})
+	selection := NewSelection(2, 1, 20, 1)
+	textInput = TextInput{
+		x:        4,
+		y:        4,
+		content:  "",
+		maxWidth: 20,
+	}
+	enter := tl.NewText(3, 1, "ENTER", tl.ColorWhite, tl.ColorRed)
+	clear := tl.NewText(3, 2, "CLEAR", tl.ColorWhite, tl.ColorRed)
+	exit := tl.NewText(3, 3, "EXIT", tl.ColorWhite, tl.ColorRed)
+	game.Engine.Screen().AddEntity(selection)
+	game.Engine.Screen().AddEntity(&textInput)
+
+	game.Engine.Screen().AddEntity(enter)
+	game.Engine.Screen().AddEntity(clear)
+	game.Engine.Screen().AddEntity(exit)
+
 	game.Engine.Screen().SetLevel(game.level)
 	return &game
 }
@@ -42,19 +53,17 @@ func (g *Game) Start() {
 }
 
 func (g *Game) Context(rv *int) {
-	g.prompt = tl.NewText(0, 0, "PROV99", tl.ColorGreen, tl.ColorBlack)
+	g.title = tl.NewText(0, 0, "PROV99", tl.ColorGreen, tl.ColorBlack)
 	*rv = chosenRV()
-	RV := tl.NewText(0, 5, strconv.Itoa(g.rv), tl.ColorGreen, tl.ColorBlack)
+	// RV := tl.NewText(0, 5, strconv.Itoa(g.rv), tl.ColorGreen, tl.ColorBlack)
 
-	g.Engine.Screen().AddEntity(g.prompt)
-	g.Engine.Screen().AddEntity(RV)
+	g.Engine.Screen().AddEntity(g.title)
+	// g.Engine.Screen().AddEntity(RV)
 }
 
 func (g *Game) Tick(e tl.Event) {}
 
-func (g *Game) Draw(s *tl.Screen) {
-
-}
+func (g *Game) Draw(s *tl.Screen) {}
 
 // Randomizes a value between 1-99
 func randomizedValue(x *int) int {
@@ -69,50 +78,11 @@ func chosenRV() int {
 	return rv
 }
 
-// State in which the player wins, which only occurs when pv == rv
+// State in which the player wins, which only occurs when game.pv == game.rv
 func (g *Game) hasWon() bool {
-	return true
+	return g.state
 }
 
-// State in which the player loses, which only occurs when att == 3
-func (g *Game) hasLost() bool {
-	return false
-}
-
-func (g *Game) attemptsLeft() int {
-	return g.att
-}
-
-/*
-Separated prompts for my simplicity of possibly
-enabling certain events to occur depending on prompts
-*/
 func GamePrompt() string {
 	return ("Choose a number between (1-99): ")
 }
-
-/*
-func (g *Game) AdjustGameStreaks(state bool) {
-	switch state {
-	case g.hasWon():
-		g.wonStreak = g.wonStreak + 1
-	case g.hasLost():
-		g.lossStreak = g.lossStreak + 1
-	}
-}
-*/
-
-/*"Attempts() + Choose a number between (1-99)" + "*/
-/*
----
-	IF (pv == rv) THEN {
-		hasWon(); generate newGame session
-		wonStreak = wonStreak + 1
-	}
-	ELSE IF (att == 3) THEN {
-		hasLost(); generate newGame session
-		lossStreak = lossStreak + 1
-	}
-	ELSE IF (pv != rv) THEN
-		att = att + 1
-*/
