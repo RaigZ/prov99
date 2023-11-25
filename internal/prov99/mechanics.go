@@ -1,7 +1,6 @@
 package prov99
 
 import (
-	"fmt"
 	"strconv"
 	"unicode"
 
@@ -90,15 +89,15 @@ func (t *TextInput) Tick(event tl.Event) {
 			game.pv, _ = strconv.Atoi(t.GetContent())
 			t.content = ""
 			if game.pv != game.rv {
-				fmt.Printf("\033[1K\r"+"att: %d, pv: %d, rv: %d", game.att, game.pv, game.rv)
+				// fmt.Printf("\033[1K\r"+"att: %d, pv: %d, rv: %d", game.att, game.pv, game.rv)
 				if game.att == 3 {
-					RV := tl.NewText(0, 5, strconv.Itoa(game.rv), tl.ColorGreen, tl.ColorBlack)
+					RV := tl.NewText(0, 5, "status: "+strconv.FormatBool(game.hasWon())+" | "+strconv.Itoa(game.pv)+" : "+strconv.Itoa(game.rv), tl.ColorGreen, tl.ColorBlack)
 					game.Engine.Screen().AddEntity(RV)
 				}
 			} else if game.pv == game.rv {
 				game.state = true
-				fmt.Printf("\033[1K\r"+"CORRECT: att: %d, pv: %d, rv: %d", game.att, game.pv, game.rv)
-				RV := tl.NewText(0, 5, strconv.Itoa(game.rv), tl.ColorGreen, tl.ColorBlack)
+				// fmt.Printf("\033[1K\r"+"CORRECT: att: %d, pv: %d, rv: %d", game.att, game.pv, game.rv)
+				RV := tl.NewText(0, 5, "status: "+strconv.FormatBool(game.hasWon())+" | "+strconv.Itoa(game.pv)+" : "+strconv.Itoa(game.rv), tl.ColorGreen, tl.ColorBlack)
 				game.Engine.Screen().AddEntity(RV)
 			}
 		case tl.KeyArrowUp:
